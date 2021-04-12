@@ -10,10 +10,15 @@ Created on Sun Apr 11 15:12:50 2021
 import pandas as pd
 import numpy as np
 import os
+#rom os import path
 import datetime
 from datetime import datetime
 # from isoweek import Week
 import matplotlib as plt
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+import matplotlib.ticker as ticker
+from pylab import savefig
 import seaborn as sns
 
 import statsmodels.api as sm
@@ -33,11 +38,11 @@ import warnings
 warnings.filterwarnings("ignore")
 
 #File path
-# os.chdir('C:\\Users\\priyanka.dawn\\OneDrive - EY\\Documents\\PD\\Kaggle')
-os.chdir('D:\\PyCharm_Projects\\forecasting_v1')
+#os.chdir('C:\\Users\\priyanka.dawn\\OneDrive - EY\\Documents\\PD\\Kaggle')
+#os.chdir('D:\\PyCharm_Projects\\forecasting_v1')
 
-# data_path = './Sample data'
-data_path = './Data'
+data_path = './Sample data'
+#data_path = './Data'
 
 
 ## Module 1 - Collating all data files and data understanding - variable definition
@@ -86,22 +91,40 @@ def merge_df(sales_data,promo_data,season):
     
 merged_data=merge_df(sales_processed,Promo_weekly,Season_data)
     
+# Module 2 - Data cleaning and EDA
+##################################################
 
+#Creating the output directory if it does not exist
+
+path = os.getcwd()
+if not os.path.exists('Output'):
+        os.makedirs('Output')
+        
+os.listdir(os.getcwd())
 
 ##subsetting the merged data for one SKU
+SKU_code=10305
+merged_data=merged_data[merged_data['SKU']==SKU_code]
 
-merged_data=merged_data[merged_data['SKU']==10305]
+#Creating output directory
+Directory='Output'
 
-# Module 2 - Data cleaning and EDA
+path2= os.path.join(path,Directory)
+
+#Creating SKU code folder in output directory
+if not os.path.exists(os.path.join(path2,str(SKU_code))):
+        os.makedirs(os.path.join(path2,str(SKU_code)))
+path3 = os.path.join(path2,str(SKU_code))
 
 # Total Sales per week
-weekly_sales = pd.DataFrame(merged_data.groupby(['ISO_week'])['Sales'].sum())
-ax = weekly_sales.unstack().plot(kind='line')
-
-ax.set_xticklabels(weekly_sales.index)
-ax.set_xlabel('ISO_week')
-
-ax.set_ylabel('Sales')
+weekly_sales = pd.DataFrame(merged_data.groupby(['ISO_week'])['Sales'].sum().reset_index())
+plt= weekly_sales['Sales'].plot(kind='line')
+plt.tick_params(axis='x',which='minor',direction='out',bottom=True,length=5)
+plt.set_xlabel('ISO_week')
+plt.set_ylabel('Sales')
+fig = plt.get_figure()
+plt.plot()
+fig.savefig(path3+'/sale_trend.jpg')
 
 #Missing data - Need to add promo and holiday
 
@@ -114,6 +137,9 @@ sku_sales_top=sku_sales[sku_sales['SKU'].isin(sku_topn)]'''
 for sku, sku_df in merged_data.groupby(['SKU']):
     ax = sku_df.boxplot(by='SEASON',column='Sales', grid=False)
     ax.set_title('Season for {}'.format(sku))
+
+fig = ax.get_figure()
+fig.savefig(path3+'/box_plot.jpg')
     
 #Outlier treatment
 def outlier_mean3sd(df,column_name):
@@ -158,20 +184,29 @@ def adf_check(time_series,sku,lag):
         print("weak evidence against null hypothesis, time series has a unit root, indicating it is non-stationary ")
 
 
+##Writing it as a text file
+'''with open("output.txt", "a") as f:
+    print("Hello stackoverflow!", file=f)
+    print("I have a question.", file=f)'''
+
+f = open("output.txt", "a")
+
 for sku,sku_df in df_new.groupby(['SKU']): # Change this as per promo
     sku_df.set_index(['ISO_week'], inplace=True)
     sku_df.drop(['SKU','Promo_flag'], axis=1, inplace=True)
     
-    print("ADF checks for {}\n\n".format(sku))
+    print("ADF checks for {}\n\n".format(sku), file=f)
     sku_df['Sales Weekly Difference'] = sku_df['Sales'] - sku_df['Sales'].shift(1)
-    print(adf_check(sku_df['Sales Weekly Difference'].dropna(),sku,"Weekly Difference"))
+    print(adf_check(sku_df['Sales Weekly Difference'].dropna(),sku,"Weekly Difference"),file = f)
     
     sku_df['Sales Monthly Difference'] = sku_df['Sales'] - sku_df['Sales'].shift(4)
-    print(adf_check(sku_df['Sales Monthly Difference'].dropna(),sku,"Monthly Difference"))
+    print(adf_check(sku_df['Sales Monthly Difference'].dropna(),sku,"Monthly Difference"), file=f)
     
     sku_df['Sales Seasonal Difference'] = sku_df['Sales'] - sku_df['Sales'].shift(13)
-    print(adf_check(sku_df['Sales Seasonal Difference'].dropna(),sku,"Seasonal Difference"))
-    
+    print(adf_check(sku_df['Sales Seasonal Difference'].dropna(),sku,"Seasonal Difference"), file=f)
+
+
+f.close()    
 
 # Autocorrelation Plots
 for sku,sku_df in df_new.groupby(['SKU']):
@@ -190,23 +225,35 @@ for sku,sku_df in df_new.groupby(['SKU']):
     sku_df['Sales Seasonal Difference'] = sku_df['Sales'] - sku_df['Sales'].shift(13)
     fig3 = plot_acf(sku_df['Sales Seasonal Difference'].dropna())
     fig3.suptitle("Sales Seasonal Difference ACF plot for - {}".format(sku))
+
+
+
+fig1.savefig(path3+'/ACF_Weekly')
+fig2.savefig(path3+'/ACF_montly')
+fig3.savefig(path3+'/ACF_seasonal')
     
 # Partial - Autocorrelation Plots
 for sku,sku_df in df_new.groupby(['SKU']):
     sku_df.set_index(['ISO_week'], inplace=True)
     sku_df.drop(['SKU','SEASON','Promo_flag'], axis=1, inplace=True)
     
-    sku_df['Sales Weekly Difference'] = sku_df['Sales'] - sku_df['Sales'].shift(1)
-    fig1 = plot_pacf(sku_df['Sales Weekly Difference'].dropna())
-    fig1.suptitle("Sales Weekly Difference PACF plot for - {}".format(sku))
+    sku_df['Sales Weekly Difference'] = sku_df['Sales'] - sku_df['Sales'].shift(2)
+    fig4 = plot_pacf(sku_df['Sales Weekly Difference'].dropna())
+    fig4.suptitle("Sales Weekly Difference PACF plot for - {}".format(sku))
     
     sku_df['Sales Monthly Difference'] = sku_df['Sales'] - sku_df['Sales'].shift(4)
-    fig2 = plot_pacf(sku_df['Sales Monthly Difference'].dropna())
-    fig2.suptitle("Sales Monthly Difference PACF plot for - {}".format(sku))
+    fig5 = plot_pacf(sku_df['Sales Monthly Difference'].dropna())
+    fig5.suptitle("Sales Monthly Difference PACF plot for - {}".format(sku))
     
-    sku_df['Sales Seasonal Difference'] = sku_df['Sales'] - sku_df['Sales'].shift(13)
-    fig3 = plot_pacf(sku_df['Sales Seasonal Difference'].dropna())
-    fig3.suptitle("Sales Seasonal Difference PACF plot for - {}".format(sku))
+    sku_df['Sales Seasonal Difference'] = sku_df['Sales'] - sku_df['Sales'].shift(6)
+    fig6 = plot_pacf(sku_df['Sales Seasonal Difference'].dropna())
+    fig6.suptitle("Sales Seasonal Difference PACF plot for - {}".format(sku))
+    
+fig4.savefig(path3+'/PAF_Weekly')
+fig5.savefig(path3+'/PAF_montly')
+fig6.savefig(path3+'/PAF_seasonal')    
+    
+#############################################3
     
 sku_df=df_new.groupby(['SKU'])['Sales'].sum().reset_index()
 
