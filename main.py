@@ -10,14 +10,10 @@ Created on Sun Apr 11 15:12:50 2021
 import pandas as pd
 import numpy as np
 import os
-# from pathlib import Path
 import shutil
-#rom os import path
 import datetime
 from datetime import datetime
-# from isoweek import Week
 import matplotlib as plt
-# import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.ticker as ticker
 from pylab import savefig
@@ -31,8 +27,6 @@ from statsmodels.tsa.arima_model import ARIMA
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import train_test_split
-# from sklearn.ensemble import RandomForestRegressor
-# import xgboost
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 # from pmdarima.arima import auto_arima
 
@@ -40,12 +34,15 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-
+# def __init__(self,path_wd,data_path):
+#     self.path_wd=os.chdir('D:\\PyCharm_Projects\\forecasting_v1')
+#     self.data_path = './Data'
+    
 #File path
 #os.chdir('C:\\Users\\Priyanka\\Documents\\Git')
-os.chdir('D:\\PyCharm_Projects\\forecasting_v1')
-
 #data_path = './Sample data'
+
+os.chdir('D:\\PyCharm_Projects\\forecasting_v1')
 data_path = './Data'
 
 import models
@@ -372,90 +369,3 @@ for SKU_code in Model_input.SKU.unique():
     Final_fcast.to_csv(SKUOutDir+'/RF_XGB_pred_'+ str(sku) +'.csv',index=False)
 
 
-
-   
-##Edit here onwards
-'''feature_importance=random_forest_importance_matrix(training_data.copy(deep=True))
-    feature_importance_dev=feature_importance.sort_values('Importance', ascending= False).iloc[:15,]
-    feature_importance_dev['Key']= fu
-    feature_importance_dev['Snapshot_Week']= fcast_weeks[0]
-    feature_importance_dev = feature_importance_dev.pivot(index=['Key','Snapshot_Week'], columns='Variable',values='Importance').reset_index() '''   
-    
-
-
-
-
-# Additional univariate models
-'''def run_fcast(ser,model,h,period):
-    if model == "arima":
-        print("Running Arima.........")
-        stepwise_model_arima = auto_arima(ser, start_p=0, start_q=0,max_p=2, max_q=2, m=period,seasonal=False,max_d=1,
-                           trace=False,
-                           error_action='ignore',  
-                           suppress_warnings=True, 
-                           stepwise=True)
-        fcast = np.round(stepwise_model_arima.predict(n_periods=h)).astype(int)
-        fcast[fcast<0] = 0
-        return fcast;
-
-    elif model == "ma":
-        print("Running Moving Average...........")
-        fcast_12 = float(ser.rolling(12).mean().iloc[-1])
-        fcast_8 = float(ser.rolling(8).mean().iloc[-1])
-        fcast_4 = float(ser.rolling(4).mean().iloc[-1])
-        fcast_1 = float(ser.rolling(1).mean().iloc[-1])
-        fcast = np.round([statistics.mean([fcast_12,fcast_8,fcast_4,fcast_1])]*h).astype(int)
-        fcast[fcast<0] = 0
-        return fcast;
-    elif model == "simexp":
-        print("Running Simple Exp..............")
-        fcast = np.round(SimpleExpSmoothing(np.asarray(ser)).fit(smoothing_level=0.4,optimized=False).forecast(h)).astype(int)
-        fcast[fcast<0] = 0
-        return fcast;
-    elif model == "holtlinear":
-        print("Running Holt Linear............")
-        fcast = np.round(Holt(ser).fit(smoothing_level = 0.3,smoothing_slope = 0.1).forecast(h)).astype(int)
-        fcast[fcast<0] = 0
-        return fcast;
-    elif model == "holtwinter":
-        print("Running Holt Winters...........")
-        fcast = np.round(ExponentialSmoothing(ser ,seasonal_periods=52 ,trend='add', 
-                                seasonal='add').fit(optimized = True).forecast(h)).astype(int)
-        fcast[fcast<0] = 0
-        return fcast;
-    elif model == "ucm":
-        print("Running UCM.........")
-        model = sm.tsa.UnobservedComponents(ser, level = True, cycle=True, stochastic_cycle=True,seasonal = 52)
-        pred_uc = list(model.fit().get_forecast(steps = h).predicted_mean)
-        fcast = [int(round(x)) for x in pred_uc]
-        pred = [0 if i < 0 else i for i in fcast]
-
-        #fcast = fcast.astype(int)
-        return pred;  
-    elif model == "croston":
-        print("Running Croston.........")
-        pred_cros = Croston(ser,h,0.4)
-        pred_cros = pred_cros[pred_cros['Demand'].isnull()]['Forecast']
-        fcast = round(pred_cros).astype(int)
-        fcast[fcast<0] = 0
-        return fcast;  
-    elif model == "naive_seasonal":
-        print("Running Naive Seasonal......")
-        if len(ser)>period:
-            fcast = round(ser[-52:][:h]).astype(int)
-            fcast[fcast<0] = 0
-            return fcast;
-    else:
-            fcast = np.repeat(np.nan,h)
-            return fcast;
-
-    if model == "arima":
-        print("Running Arima.........")
-        stepwise_model_arima = auto_arima(ser, start_p=0, start_q=0,max_p=2, max_q=2, m=period,seasonal=False,max_d=1,
-                           trace=False,
-                           error_action='ignore',  
-                           suppress_warnings=True, 
-                           stepwise=True)
-        fcast = np.round(stepwise_model_arima.predict(n_periods=h)).astype(int)
-        fcast[fcast<0] = 0
-        return fcast'''
