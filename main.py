@@ -17,12 +17,16 @@ try:
 except OSError:
     print("Can't change the Current Working Directory")  
         
-
+# Importing all the modules
+#Module containing the file directory
 import settings    
-
+#Sales and promo data preparation
 from Codes import dataPreProcess
+#Checking the trend , stationarity and ACF/ PACF plots
 from Codes import eda
+#Ceating and deleting the output directory
 from Codes import utils
+#Traing the Random Forest and XGB model
 from Codes import modelTrain
 
 # Delete output directory
