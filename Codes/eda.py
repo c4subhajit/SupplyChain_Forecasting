@@ -13,6 +13,9 @@ from statsmodels.graphics.tsaplots import plot_acf,plot_pacf
 from statsmodels.tsa.stattools import adfuller
 # from . import utils
 
+# import matplotlib.pyplot as plt
+# plt.ioff()
+
 #Model input for all SKUs
 def processedData(SKUOutDir, Model_input_subset, SKU_code):
     
@@ -25,7 +28,8 @@ def processedData(SKUOutDir, Model_input_subset, SKU_code):
     fig = plt.get_figure()
     plt.plot()
     fig.savefig(SKUOutDir+'/sale_trend.jpg')
-       
+    # plt.close(fig)
+    
     # Box plots
     #sku_df = Model_input_subset.groupby(['SKU'])
     for sku, sku_df in Model_input_subset.groupby(['SKU']):
@@ -34,6 +38,7 @@ def processedData(SKUOutDir, Model_input_subset, SKU_code):
     
     fig = ax.get_figure()
     fig.savefig(SKUOutDir+'/box_plot.jpg')
+    # plt.close(fig)
         
     #Outlier treatment
     def outlier_mean3sd(df,column_name, *args, **kwargs):
@@ -68,7 +73,7 @@ def processedData(SKUOutDir, Model_input_subset, SKU_code):
         # skuStatsFile=open(os.path.join(SKUOutDir,str('stats_' + str(SKU_code) +'.txt')),'a')
         
         result = adfuller(time_series)
-        print('{} :'.format(lag))
+        # print('{} :'.format(lag))
         print('{} :'.format(lag),file = skuStatsFile)
         print(str("-"*len(str(format(lag)+" :"))), file=skuStatsFile)
         
@@ -77,18 +82,18 @@ def processedData(SKUOutDir, Model_input_subset, SKU_code):
         # print('Augmented Dickey-Fuller Test for SKU - {} for {} :'.format(sku,lag),file = skuStatsFile)
     
         for value,label in zip(result,labels):
-            print(label+' : '+str(value))
+            # print(label+' : '+str(value))
             print(label+' : '+str(value),file = skuStatsFile)
         # print('\n');print('\n',file = skuStatsFile);
         
         if result[1] <= 0.05:
-            print("strong evidence against the null hypothesis, reject the null hypothesis. Data has no unit root and is stationary")
+            # print("strong evidence against the null hypothesis, reject the null hypothesis. Data has no unit root and is stationary")
             print("strong evidence against the null hypothesis, reject the null hypothesis. Data has no unit root and is stationary",file = skuStatsFile)
         else:
-            print("weak evidence against null hypothesis, time series has a unit root, indicating it is non-stationary ")
+            # print("weak evidence against null hypothesis, time series has a unit root, indicating it is non-stationary ")
             print("weak evidence against null hypothesis, time series has a unit root, indicating it is non-stationary ",file = skuStatsFile)
         
-        print('\n')
+        # print('\n')
         return '\n'
         
     for sku,sku_df in Model_input_subset.groupby(['SKU']): # Change this as per promo
@@ -109,7 +114,7 @@ def processedData(SKUOutDir, Model_input_subset, SKU_code):
             print("ADF checks for {}".format(sku), file=skuStatsFile)
             print(str("#"*len(str("ADF checks for " + sku))) + "\n\n", file=skuStatsFile)
             
-            print('Augmented Dickey-Fuller Test for SKU: {}\n'.format(sku))
+            # print('Augmented Dickey-Fuller Test for SKU: {}\n'.format(sku))
             print('Augmented Dickey-Fuller Test for SKU: {}'.format(sku),file = skuStatsFile)
             print(str("="*len(str("Augmented Dickey-Fuller Test for SKU: " + sku))) + "\n", file=skuStatsFile)
         
@@ -139,16 +144,19 @@ def processedData(SKUOutDir, Model_input_subset, SKU_code):
         fig1 = plot_acf(sku_df['Sales Weekly Difference'].dropna())
         fig1.suptitle("Sales Weekly Difference ACF plot for - {}".format(sku))
         fig1.savefig(SKUOutDir+'/ACF_Weekly')
-        
+        # plt.close(fig1)
+    
         sku_df['Sales Monthly Difference'] = sku_df['Sales'] - sku_df['Sales'].shift(4)
         fig2 = plot_acf(sku_df['Sales Monthly Difference'].dropna())
         fig2.suptitle("Sales Monthly Difference ACF plot for - {}".format(sku))
         fig2.savefig(SKUOutDir+'/ACF_montly')
+        # plt.close(fig2)
         
         '''sku_df['Sales Seasonal Difference'] = sku_df['Sales'] - sku_df['Sales'].shift(13)
         fig3 = plot_acf(sku_df['Sales Seasonal Difference'].dropna())
         fig3.suptitle("Sales Seasonal Difference ACF plot for - {}".format(sku))
-        fig3.savefig(SKUOutDir+'/ACF_seasonal')'''
+        fig3.savefig(SKUOutDir+'/ACF_seasonal')
+        plt.close(fig3)'''
     
     #Sample zise
     ss=Model_input_subset.shape[0]
@@ -162,17 +170,20 @@ def processedData(SKUOutDir, Model_input_subset, SKU_code):
         fig4 = plot_pacf(sku_df['Sales Weekly Difference'].dropna(),lags=int(ss/2-3))
         fig4.suptitle("Sales Weekly Difference PACF plot for - {}".format(sku))    
         fig4.savefig(SKUOutDir+'/PACF_Weekly',bbox_inches='tight')
+        # plt.close(fig4)
         
         #DYNAMIC LAG CREATION BASED ON SAMPLE SIZE
         sku_df['Sales Monthly Difference'] = sku_df['Sales'] - sku_df['Sales'].shift(4)
         fig5 = plot_pacf(sku_df['Sales Monthly Difference'].dropna(),lags=int(ss/2-4))
         fig5.suptitle("Sales Monthly Difference PACF plot for - {}".format(sku))
         fig5.savefig(SKUOutDir+'/PACF_montly')
+        # plt.close(fig5)
         
         '''sku_df['Sales Seasonal Difference'] = sku_df['Sales'] - sku_df['Sales'].shift(13)
         fig6 = plot_pacf(sku_df['Sales Seasonal Difference'].dropna(),lags=int(ss/2-13))
         fig6.suptitle("Sales Seasonal Difference PACF plot for - {}".format(sku))
-        fig6.savefig(SKUOutDir+'/PACF_seasonal')'''
+        fig6.savefig(SKUOutDir+'/PACF_seasonal')
+        plt.close(fig6)'''
     #############################################3
         
     # sku_df=df_new.groupby(['SKU'])['Sales'].sum().reset_index()

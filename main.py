@@ -6,27 +6,23 @@ Created on Sun Apr 11 15:12:50 2021
 """
 
 #Importing required libraries
-import os
+import os,datetime
 
 import warnings
 warnings.filterwarnings("ignore")
 
 try:
     # Change the current working Directory    
-    os.chdir('D:\\PyCharm_Projects\\forecasting_v1')
+    os.chdir(os.path.dirname(__file__))
 except OSError:
     print("Can't change the Current Working Directory")  
         
-# Importing all the modules
-#Module containing the file directory
+
 import settings    
-#Sales and promo data preparation
+
 from Codes import dataPreProcess
-#Checking the trend , stationarity and ACF/ PACF plots
 from Codes import eda
-#Ceating and deleting the output directory
 from Codes import utils
-#Traing the Random Forest and XGB model
 from Codes import modelTrain
 
 # Delete output directory
@@ -41,8 +37,10 @@ salesPromoData=dataPreProcess.merge_df(sales_processed)
 
 Model_input=salesPromoData.copy(deep=True)
 
+
 # EDA on processed data by each SKU
 for SKU_code in salesPromoData.SKU.unique():
+    t0 = datetime.datetime.now()
     
     ##subsetting the merged data for one SKU
     Model_input_subset=Model_input[Model_input['SKU']==SKU_code]
@@ -56,5 +54,8 @@ for SKU_code in salesPromoData.SKU.unique():
 
     # Run Models
     modelTrain.executeModels(SKUOutDir,Model_input_subset)
+
+    t1 = datetime.datetime.now() - t0
+    print('Processed for ' + str(SKU_code) + '. Time Elapsed: ' + str(t1))
     
-print('Execution Complete!')
+print('\nExecution Complete!')
