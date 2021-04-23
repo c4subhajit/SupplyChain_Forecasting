@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Updated on Fri Apr 23 22:36:30 2021
+
+@author: Priyanka Dawn
+"""
+
 """
 Created on Sat Apr 17 14:11:51 2021
 
@@ -30,11 +37,11 @@ def processedData(SKUOutDir, Model_input_subset, SKU_code):
     fig.savefig(SKUOutDir+'/sale_trend.jpg')
     # plt.close(fig)
     
-    # Box plots
-    #sku_df = Model_input_subset.groupby(['SKU'])
-    for sku, sku_df in Model_input_subset.groupby(['SKU']):
-        ax = sku_df.boxplot(by='SEASON',column='Sales', grid=False)
-        ax.set_title('Season for {}'.format(sku))
+
+    sku=SKU_code
+    sku_df=Model_input_subset
+    ax = sku_df.boxplot(by='SEASON',column='Sales', grid=False)
+    ax.set_title('Season for {}'.format(SKU_code))
     
     fig = ax.get_figure()
     fig.savefig(SKUOutDir+'/box_plot.jpg')
@@ -59,8 +66,6 @@ def processedData(SKUOutDir, Model_input_subset, SKU_code):
         df.rename(columns={'sales_treated':column_name},inplace=True)
         return(df)
     
-    # treated_data_3sd = outlier_mean3sd(Model_input_subset,'Sales')
-    # df_new=Model_input_subset.copy(deep=True)
         
     skuStatsFile = open(os.path.join(SKUOutDir,str('stats_' + str(SKU_code) +'.txt')),'w+')
     skuStatsFile.close()
@@ -96,47 +101,48 @@ def processedData(SKUOutDir, Model_input_subset, SKU_code):
         # print('\n')
         return '\n'
         
-    for sku,sku_df in Model_input_subset.groupby(['SKU']): # Change this as per promo
+    # Change this as per promo
         
-        try:
-          if sku is not None:
-              sku=format(sku)
-          else:
-              raise TypeError("Null values not allowed")
-        except:
-            print("SKU value Null")
-        else:
-            sku_df.set_index(['ISO_week'], inplace=True)
-            sku_df.drop(['SKU','Promo_flag'], axis=1, inplace=True)
-            
-            skuStatsFile=open(os.path.join(SKUOutDir,str('stats_' + str(SKU_code) +'.txt')),'a')
-            
-            print("ADF checks for {}".format(sku), file=skuStatsFile)
-            print(str("#"*len(str("ADF checks for " + sku))) + "\n\n", file=skuStatsFile)
-            
-            # print('Augmented Dickey-Fuller Test for SKU: {}\n'.format(sku))
-            print('Augmented Dickey-Fuller Test for SKU: {}'.format(sku),file = skuStatsFile)
-            print(str("="*len(str("Augmented Dickey-Fuller Test for SKU: " + sku))) + "\n", file=skuStatsFile)
+    try:
+      if sku is not None:
+          sku=format(sku)
+      else:
+          raise TypeError("Null values not allowed")
+    except:
+        print("SKU value Null")
+    else:
+        sku_df.set_index(['ISO_week'], inplace=True)
+        sku_df.drop(['SKU','Promo_flag'], axis=1, inplace=True)
         
-            sku_df['Sales Weekly Difference'] = sku_df['Sales'] - sku_df['Sales'].shift(1)
-            # print(adf_check(sku_df['Sales Weekly Difference'].dropna(),sku,"Weekly Difference"))
-            print(adf_check(sku_df['Sales Weekly Difference'].dropna(),sku,"Weekly Difference",'hello'),file = skuStatsFile)
-            
-            sku_df['Sales Monthly Difference'] = sku_df['Sales'] - sku_df['Sales'].shift(4)
-            # print(adf_check(sku_df['Sales Monthly Difference'].dropna(),sku,"Monthly Difference"))
-            print(adf_check(sku_df['Sales Monthly Difference'].dropna(),sku,"Monthly Difference"), file=skuStatsFile)
-            
-            '''sku_df['Sales Seasonal Difference'] = sku_df['Sales'] - sku_df['Sales'].shift(13)
-            # print(adf_check(sku_df['Sales Seasonal Difference'].dropna(),sku,"Seasonal Difference"))
-            print(adf_check(sku_df['Sales Seasonal Difference'].dropna(),sku,"Seasonal Difference"), file=skuStatsFile)'''
+        skuStatsFile=open(os.path.join(SKUOutDir,str('stats_' + str(SKU_code) +'.txt')),'a')
         
-            print(str("="*len(str("Augmented Dickey-Fuller Test for SKU: " + sku))) + "\n\n", file=skuStatsFile)
-            
-            skuStatsFile.close()  
+        print("ADF checks for {}".format(sku), file=skuStatsFile)
+        print(str("#"*len(str("ADF checks for " + sku))) + "\n\n", file=skuStatsFile)
+        
+        # print('Augmented Dickey-Fuller Test for SKU: {}\n'.format(sku))
+        print('Augmented Dickey-Fuller Test for SKU: {}'.format(sku),file = skuStatsFile)
+        print(str("="*len(str("Augmented Dickey-Fuller Test for SKU: " + sku))) + "\n", file=skuStatsFile)
+    
+        sku_df['Sales Weekly Difference'] = sku_df['Sales'] - sku_df['Sales'].shift(1)
+        # print(adf_check(sku_df['Sales Weekly Difference'].dropna(),sku,"Weekly Difference"))
+        print(adf_check(sku_df['Sales Weekly Difference'].dropna(),sku,"Weekly Difference",'hello'),file = skuStatsFile)
+        
+        sku_df['Sales Monthly Difference'] = sku_df['Sales'] - sku_df['Sales'].shift(4)
+        # print(adf_check(sku_df['Sales Monthly Difference'].dropna(),sku,"Monthly Difference"))
+        print(adf_check(sku_df['Sales Monthly Difference'].dropna(),sku,"Monthly Difference"), file=skuStatsFile)
+        
+        '''sku_df['Sales Seasonal Difference'] = sku_df['Sales'] - sku_df['Sales'].shift(13)
+        # print(adf_check(sku_df['Sales Seasonal Difference'].dropna(),sku,"Seasonal Difference"))
+        print(adf_check(sku_df['Sales Seasonal Difference'].dropna(),sku,"Seasonal Difference"), file=skuStatsFile)'''
+    
+        print(str("="*len(str("Augmented Dickey-Fuller Test for SKU: " + sku))) + "\n\n", file=skuStatsFile)
+        
+        skuStatsFile.close()  
     
     # Autocorrelation Plots
-    for sku,sku_df in Model_input_subset.groupby(['SKU']):
-        # sku_df_main = sku_df.copy()
+    
+    if sku_df.shape[0]>100:
+        
         sku_df.set_index(['ISO_week'], inplace=True)
         sku_df.drop(['SKU','SEASON','Promo_flag'], axis=1, inplace=True)
         
@@ -145,24 +151,44 @@ def processedData(SKUOutDir, Model_input_subset, SKU_code):
         fig1.suptitle("Sales Weekly Difference ACF plot for - {}".format(sku))
         fig1.savefig(SKUOutDir+'/ACF_Weekly')
         # plt.close(fig1)
-    
+        
         sku_df['Sales Monthly Difference'] = sku_df['Sales'] - sku_df['Sales'].shift(4)
         fig2 = plot_acf(sku_df['Sales Monthly Difference'].dropna())
         fig2.suptitle("Sales Monthly Difference ACF plot for - {}".format(sku))
         fig2.savefig(SKUOutDir+'/ACF_montly')
         # plt.close(fig2)
-        
-        '''sku_df['Sales Seasonal Difference'] = sku_df['Sales'] - sku_df['Sales'].shift(13)
+            
+        sku_df['Sales Seasonal Difference'] = sku_df['Sales'] - sku_df['Sales'].shift(13)
         fig3 = plot_acf(sku_df['Sales Seasonal Difference'].dropna())
         fig3.suptitle("Sales Seasonal Difference ACF plot for - {}".format(sku))
         fig3.savefig(SKUOutDir+'/ACF_seasonal')
-        plt.close(fig3)'''
+        #plt.close(fig3)
+    else:
+        
+        sku_df.set_index(['ISO_week'], inplace=True)
+        sku_df.drop(['SKU','SEASON','Promo_flag'], axis=1, inplace=True)
+        
+        sku_df['Sales Weekly Difference'] = sku_df['Sales'] - sku_df['Sales'].shift(1)
+        fig1 = plot_acf(sku_df['Sales Weekly Difference'].dropna())
+        fig1.suptitle("Sales Weekly Difference ACF plot for - {}".format(sku))
+        fig1.savefig(SKUOutDir+'/ACF_Weekly')
+        # plt.close(fig1)
+        
+        sku_df['Sales Monthly Difference'] = sku_df['Sales'] - sku_df['Sales'].shift(4)
+        fig2 = plot_acf(sku_df['Sales Monthly Difference'].dropna())
+        fig2.suptitle("Sales Monthly Difference ACF plot for - {}".format(sku))
+        fig2.savefig(SKUOutDir+'/ACF_montly')
+        # plt.close(fig2)
+
+       
+       
+    
     
     #Sample zise
     ss=Model_input_subset.shape[0]
         
     # Partial - Autocorrelation Plots
-    for sku,sku_df in Model_input_subset.groupby(['SKU']):
+    if sku_df.shape[0]>100:
         sku_df.set_index(['ISO_week'], inplace=True)
         sku_df.drop(['SKU','SEASON','Promo_flag'], axis=1, inplace=True)
         
@@ -179,25 +205,36 @@ def processedData(SKUOutDir, Model_input_subset, SKU_code):
         fig5.savefig(SKUOutDir+'/PACF_montly')
         # plt.close(fig5)
         
-        '''sku_df['Sales Seasonal Difference'] = sku_df['Sales'] - sku_df['Sales'].shift(13)
+        sku_df['Sales Seasonal Difference'] = sku_df['Sales'] - sku_df['Sales'].shift(13)
         fig6 = plot_pacf(sku_df['Sales Seasonal Difference'].dropna(),lags=int(ss/2-13))
         fig6.suptitle("Sales Seasonal Difference PACF plot for - {}".format(sku))
         fig6.savefig(SKUOutDir+'/PACF_seasonal')
-        plt.close(fig6)'''
-    #############################################3
+        #plt.close(fig6)
+    else:
+        sku_df.set_index(['ISO_week'], inplace=True)
+        sku_df.drop(['SKU','SEASON','Promo_flag'], axis=1, inplace=True)
         
-    # sku_df=df_new.groupby(['SKU'])['Sales'].sum().reset_index()
-    
+        sku_df['Sales Weekly Difference'] = sku_df['Sales'] - sku_df['Sales'].shift(2)
+        fig4 = plot_pacf(sku_df['Sales Weekly Difference'].dropna(),lags=int(ss/2-3))
+        fig4.suptitle("Sales Weekly Difference PACF plot for - {}".format(sku))    
+        fig4.savefig(SKUOutDir+'/PACF_Weekly',bbox_inches='tight')
+        # plt.close(fig4)
+        
+        #DYNAMIC LAG CREATION BASED ON SAMPLE SIZE
+        sku_df['Sales Monthly Difference'] = sku_df['Sales'] - sku_df['Sales'].shift(4)
+        fig5 = plot_pacf(sku_df['Sales Monthly Difference'].dropna(),lags=int(ss/2-4))
+        fig5.suptitle("Sales Monthly Difference PACF plot for - {}".format(sku))
+        fig5.savefig(SKUOutDir+'/PACF_montly')
+        # plt.close(fig5)
+           
     # EWMA on using different spans
-    for sku,sku_df in Model_input_subset.groupby(['SKU']):
-        #sku_df.set_index(['ISO_week'], inplace=True)
-        #sku_df.drop(['SKU','ISO_Week'], axis=1, inplace=True)
-        sku_df['EWMA_2_weeks'] = sku_df['Sales'].ewm(span=2).mean()
-        sku_df['EWMA_4_weeks'] = sku_df['Sales'].ewm(span=4).mean()
-        sku_df['EWMA_8_weeks'] = sku_df['Sales'].ewm(span=8).mean()
-        sku_df['EWMA_13_weeks'] = sku_df['Sales'].ewm(span=13).mean()
-        ax = sku_df[['Sales','EWMA_2_weeks','EWMA_4_weeks','EWMA_8_weeks','EWMA_13_weeks']].plot()
-        ax.set_title('EWMA Sales plot for - {}'.format(sku))
-        fig = ax.get_figure()
-        fig.savefig(SKUOutDir+'/EWMA_nspans')
-        
+
+    sku_df['EWMA_2_weeks'] = sku_df['Sales'].ewm(span=2).mean()
+    sku_df['EWMA_4_weeks'] = sku_df['Sales'].ewm(span=4).mean()
+    sku_df['EWMA_8_weeks'] = sku_df['Sales'].ewm(span=8).mean()
+    sku_df['EWMA_13_weeks'] = sku_df['Sales'].ewm(span=13).mean()
+    ax = sku_df[['Sales','EWMA_2_weeks','EWMA_4_weeks','EWMA_8_weeks','EWMA_13_weeks']].plot()
+    ax.set_title('EWMA Sales plot for - {}'.format(sku))
+    fig = ax.get_figure()
+    fig.savefig(SKUOutDir+'/EWMA_nspans')
+    
